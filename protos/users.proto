@@ -1,10 +1,15 @@
 syntax = "proto3";
 package grpc_server;
 
-option go_package = ".";
+option go_package = "grpc-go/pb";
 
-service UserServ {
-    rpc GetUserData(Empty) returns(Users);
+service UserService {
+    rpc GetUserData(ID) returns(User);
+    rpc GetAllUser(Empty) returns(Users);
+}
+
+message ID {
+    uint64 id = 1;
 }
 
 message Empty {}

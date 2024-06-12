@@ -1,28 +1,30 @@
 package main
 
 import (
-	"fmt"
+	"log"
+	"net"
 
+	"github.com/raafly/gRPC-server/db"
 	pb "github.com/raafly/gRPC-server/pb"
-	"google.golang.org/protobuf/proto"
+	"github.com/raafly/gRPC-server/service"
+	"google.golang.org/grpc"
 )
 
 func main() {
-	users := &pb.Users{
-		Users: []*pb.User{
-			{
-				Id: 1,
-				Name: "rafly",
-				Email: "rafliexecutor375@gmail.com",
-			},
-			{
-				Id: 2,
-				Name: "xShavaor",
-				Email: "anonymousx@gmail.com",
-			},
-		},
+	db := db.NewDB()
+
+	netListen, err := net.Listen("tcp", ":50051")
+	if err != nil {
+		log.Println("cannot listen port %w", err.Error())
 	}
 
-	result, _ := proto.Marshal(users)
-	fmt.Println(result)
+	gprcServer := grpc.NewServer()
+	portService := service.UserService{DB: *db}
+	pb.RegisterUserServiceServer(gprcServer, &portService)
+
+
+	log.Println("server running...")
+	if err := gprcServer.Serve(netListen); err != nil {
+		log.Println("failed to serve %w", err.Error())
+	}
 }
